@@ -18,6 +18,7 @@ SOFT_PURPLE = "#C854FE"
 
 def text_to_type_show():
     #Refreshes the text to type area with a new text
+    text_to_type.yview_moveto(0.0)
     text_to_type.config(state='normal')
     text_to_type.replace("1.0", 'end', ' '.join(refresh_words()))
     text_to_type.config(state='disabled')
