@@ -1,4 +1,6 @@
 from random import shuffle
+import os
+import sys
 
 word_list: list = []
 typed_words: dict = {}
@@ -7,9 +9,14 @@ current_word_index: int = 0
 # Used to check if the typed char should be checked or not
 ACCEPTED_CHARS = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.abspath(relative_path)
+
 # Getting an array of 1k words from an api in blocks of 200 for each length (3 to 7 letters)
 def get_words():
-    with open('./words.txt', 'r') as file:
+    with open(resource_path('words.txt'), 'r', encoding='utf-8') as file:
         return file.read().split(', ')
 
 #Creates a new list and shows it

@@ -1,14 +1,15 @@
 import tkinter
-from pathlib import Path
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 from logic import *
 from time import time
+import sys
+import os
 
-def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
-
-OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"./gui")
+def resource_path(relative_path):
+    """Get absolute path to resource, works for dev and PyInstaller"""
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 SOFT_RED = "#CC4A4A"
 SOFT_WHITE = "#F3F3F3"
@@ -41,6 +42,7 @@ def text_to_type_show():
 # ----------------------------------------------------------------
 # Init -----------------------------------------------------------
 window = Tk()
+window.title("Typing Speedometer")
 window.geometry("820x600")
 window.configure(bg=SOFT_RED)
 
@@ -86,7 +88,7 @@ def timer_start():
         old_time = time()
 
 timer_bg = PhotoImage(
-    file=relative_to_assets("entry_3.png"))
+    file=resource_path("./gui/entry_3.png"))
 timer_entry_bg = canvas.create_image(
     708.5,
     370.75,
@@ -112,7 +114,7 @@ timer_entry.insert(0, '60')
 timer_entry.config(state="disabled")
 
 timer_im = PhotoImage(
-    file=relative_to_assets("image_1.png"))
+    file=resource_path("./gui/image_1.png"))
 timer = canvas.create_image(
     652.0,
     370.0,
@@ -129,10 +131,10 @@ def enable_button():
     refresh_button.config(command=lambda :text_to_type_show(), image=active_btn_im)
 
 disable_btn_im = PhotoImage(
-    file=relative_to_assets("button_2.png"))
+    file=resource_path("./gui/button_2.png"))
 
 active_btn_im = PhotoImage(
-    file=relative_to_assets("button_1.png"))
+    file=resource_path("./gui/button_1.png"))
 
 refresh_button = Button(
     image=active_btn_im,
@@ -165,7 +167,7 @@ def on_focus_out(event, entry, text):
         entry.config(foreground="gray")
 
 user_box_im = PhotoImage(
-    file=relative_to_assets("entry_2.png"))
+    file=resource_path("./gui/entry_2.png"))
 user_entry_bg = canvas.create_image(
     409.5,
     370.0,
@@ -199,7 +201,7 @@ user_entry.bind('<Key>', lambda event: [check_correct_char(event, entry=user_ent
 # ----------------------------------------------------------------
 # Main text area where to show to user what to type--------------------------------
 text_to_type_im = PhotoImage(
-    file=relative_to_assets("entry_1.png"))
+    file=resource_path("./gui/entry_1.png"))
 text_to_type_bg = canvas.create_image(
     409.5,
     171.5,
@@ -239,7 +241,7 @@ canvas.create_text(
 )
 
 results_im = PhotoImage(
-    file=relative_to_assets("entry_4.png"))
+    file=resource_path("./gui/entry_4.png"))
 results_bg = canvas.create_image(
     699.0,
     508.0,
