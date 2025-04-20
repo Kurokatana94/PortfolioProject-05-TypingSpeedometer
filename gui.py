@@ -15,8 +15,8 @@ SOFT_WHITE = "#F3F3F3"
 SOFT_GREEN = "#52DF81"
 SOFT_PURPLE = "#C854FE"
 
-#TODO PLEASE THINK ABOUT THE REFRESH BUTTON
-#TODO YOU NEED TO ADD THE LOGIC AND FUNCTION (PROBABLY IN LOGIC.PY) FOR GETTING THE RESULTS, SAVING AND COMPARING ON THE LEADERBOARD
+#TODO PLEASE THINK ABOUT THE REFRESH BUTTON (ALWAYS ON OR NOT)
+#TODO YOU NEED TO ADD THE LOGIC AND FUNCTION FOR SAVING AND COMPARING ON THE LEADERBOARD
 
 def text_to_type_show():
     #Refreshes the text to type area with a new text
@@ -28,14 +28,16 @@ def text_to_type_show():
     try:
         timer_entry.config(state="normal")
         timer_entry.delete(0, "end")
-        timer_entry.insert(0, "2")
+        timer_entry.insert(0, "10")
         timer_entry.config(state="disabled")
     except Exception as e:
         # timer_entry is not defined
         print('The following error has occurred:', e)
     #Refreshes the user input area to default
+    user_entry.config(state='normal')
     user_entry.delete(0, 'end')
-    reset_char_index()
+    on_focus_out(event=None, entry=user_entry, text='Type here to start')
+    reset_values()
     disable_button()
     # print(text_to_type.get(1.0, 'end'))
 
@@ -62,9 +64,12 @@ old_time = None
 
 def timer_end():
     global old_time
-    if int(timer_entry.get()) <= 0:
+    if old_time is not None and int(timer_entry.get()) <= 0:
         old_time = None
+        text_to_type.focus_set()
         enable_button()
+        user_entry.config(state='disabled')
+        get_results(results)
 
 def timer_update():
     global old_time
@@ -120,11 +125,11 @@ timer = canvas.create_image(
 # Start button ------------------------------------------
 #Disable
 def disable_button():
-    start_button.config(command=lambda: None, image=disable_btn_im)
+    refresh_button.config(command=lambda: None, image=disable_btn_im)
 
 #Enable
 def enable_button():
-    start_button.config(command=lambda :text_to_type_show(), image=active_btn_im)
+    refresh_button.config(command=lambda :text_to_type_show(), image=active_btn_im)
 
 disable_btn_im = PhotoImage(
     file=relative_to_assets("button_2.png"))
@@ -132,7 +137,7 @@ disable_btn_im = PhotoImage(
 active_btn_im = PhotoImage(
     file=relative_to_assets("button_1.png"))
 
-start_button = Button(
+refresh_button = Button(
     image=active_btn_im,
     borderwidth=0,
     highlightthickness=0,
@@ -140,7 +145,7 @@ start_button = Button(
     command=lambda :text_to_type_show(),
     relief="flat",
 )
-start_button.place(
+refresh_button.place(
     x=311.0,
     y=468.0,
     width=197.0,
@@ -151,6 +156,17 @@ disable_button()
 
 # ---------------------------------------------------------------------------------
 # User entry area where they must type-----------------------------------------------
+#Entries placeholders
+def on_entry_click(event, entry, text):
+    if entry.get() == text:
+        entry.delete(0, 'end')
+        entry.config(foreground="#000716")
+
+def on_focus_out(event, entry, text):
+    if entry.get() == "":
+        entry.insert(0, text)
+        entry.config(foreground="gray")
+
 user_box_im = PhotoImage(
     file=relative_to_assets("entry_2.png"))
 user_entry_bg = canvas.create_image(
@@ -179,6 +195,9 @@ user_entry.place(
     width=301.0,
     height=34.0
 )
+user_entry.insert('end', 'Type here to start')
+user_entry.bind("<FocusIn>", lambda event: on_entry_click(event, user_entry, 'Type here to start'))
+user_entry.bind("<FocusOut>", lambda event: on_focus_out(event, user_entry, 'Type here to start'))
 user_entry.bind('<Key>', lambda event: [check_correct_char(event, entry=user_entry, widget=text_to_type), timer_start()])
 # ----------------------------------------------------------------
 # Main text area where to show to user what to type--------------------------------
@@ -234,7 +253,7 @@ results = Text(
     bd=0,
     bg=SOFT_RED,
     fg=SOFT_WHITE,
-    highlightthickness=0
+    highlightthickness=0,
 )
 results.place(
     x=626.0,
@@ -246,6 +265,7 @@ results.insert("end", "#01 - 222 CPM\n"
                       "#02 - 189 CPM\n"
                       "#03 - 99 CPM\n"
                       "#99 - 12 CPM")
+results.config(state='disabled',)
 
 window.resizable(False, False)
 

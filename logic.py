@@ -64,8 +64,12 @@ def remove_extra_chars(entry):
     if entry.get().endswith(' '):
         entry.delete(0, 'end')
 
-def reset_char_index():
+def reset_values():
+    global typed_words
+    global current_word_index
     global last_typed_char_index
+    typed_words = {}
+    current_word_index = 0
     last_typed_char_index = -1
 
 #---------------------------------------------------------------------USER INPUT SECTION---------------------------------------------------------------------------------
@@ -114,5 +118,20 @@ def check_correct_char(event, entry, widget):
             widget.tag_add("wrong", f"1.{last_typed_char_index}")
         scroll_down(widget=widget)
     widget.tag_add("center", "1.0", "end")
-#------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------TIMER HANDLING SECTION-----------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------LEADERBOARD/RESULTS SECTION--------------------------------------------------------------------------------
+
+def get_chars_per_minute():
+    n = 0
+    for k ,v in typed_words.items():
+        for char in k:
+            n+=1 if char == v[k.index(char)] else 0
+    return n
+
+def get_results(widget):
+    cpm = get_chars_per_minute()
+    wpm = cpm // 5
+    widget.config(state='normal')
+    widget.replace('1.0', 'end', f'{cpm} CPM - {wpm} WPM')
+    widget.config(state='disabled')
+    print(cpm, wpm)
