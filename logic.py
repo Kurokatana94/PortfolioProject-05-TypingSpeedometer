@@ -1,17 +1,16 @@
-import requests
 from random import shuffle
 
 word_list: list = []
-lines_list: list = []
 typed_words: dict = {}
 last_typed_char_index: int = -1
 current_word_index: int = 0
 # Used to check if the typed char should be checked or not
-ACCEPTED_CHARS = list('abcdefghijklmnopqrstuvwxyz')
+ACCEPTED_CHARS = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 
 # Getting an array of 1k words from an api in blocks of 200 for each length (3 to 7 letters)
 def get_words():
-    return ' '.join([' '.join(requests.get(url=f'https://random-word-api.vercel.app/api?words=200&length={n}').json()) for n in range(3, 8)]).split()
+    with open('./words.txt', 'r') as file:
+        return file.read().split(', ')
 
 #Creates a new list and shows it
 def refresh_words():
@@ -38,24 +37,6 @@ def scroll_up(widget):
         if y <= height:
             widget.yview_scroll(-1, 'units')
 
-# Not used at the moment (and probably never will be again)----------------
-# def check_string_length(string):
-#     if len(string.replace(' ','')) > 21:
-#         return False
-#     return True
-#
-# def format_text():
-#     new_string = ''
-#     for word in word_list:
-#         prev_string = new_string
-#         new_string += f'{word} '
-#         if not check_string_length(new_string):
-#             lines_list.append(prev_string + '\n')
-#             new_string = f'{word} '
-#     formatted_string = ''.join(lines_list)
-#     return formatted_string
-#--------------------------------------------------------------------------
-
 # Needs to be called AFTER index increase <----------- !!!!!!
 def get_new_word_char_index():
     return len(' '.join(word_list[:current_word_index]))
@@ -63,6 +44,7 @@ def get_new_word_char_index():
 def remove_extra_chars(entry):
     if entry.get().endswith(' '):
         entry.delete(0, 'end')
+
 
 def reset_values():
     global typed_words
@@ -79,7 +61,7 @@ def check_correct_char(event, entry, widget):
     global last_typed_char_index
     global current_word_index
     global typed_words
-    char = event.char
+    char = event.char.lower()
     remove_extra_chars(entry=entry)
 
     if event.keysym == 'BackSpace' and last_typed_char_index > -1:
@@ -106,8 +88,8 @@ def check_correct_char(event, entry, widget):
         last_typed_char_index = get_new_word_char_index()
         entry.delete(0, 'end')
         scroll_down(widget=widget)
-        *_, l = typed_words.items()
-        print(typed_words, l)
+        # *_, l = typed_words.items()
+        # print(typed_words, l)
 
     #Way too many ands but I need them not to nest. Anyway checks if user didn't input weird chars (not totally sure if I need those ands anymore after I added the validation in gui, but whatever for now)
     elif char != '' and char in ACCEPTED_CHARS and len(entry.get()) < len(word_list[current_word_index]) and len(char) == 1:
@@ -121,17 +103,24 @@ def check_correct_char(event, entry, widget):
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------LEADERBOARD/RESULTS SECTION--------------------------------------------------------------------------------
 
+# Gets the amount of characters typed in one minute
 def get_chars_per_minute():
     n = 0
-    for k ,v in typed_words.items():
-        for char in k:
-            n+=1 if char == v[k.index(char)] else 0
+    try:
+        for k ,v in typed_words.items():
+            for char in k:
+                n+=1 if char == v[k.index(char)].lower() else 0
+    except Exception as e:
+        print("While getting the result, the following error has occurred: ", e)
     return n
 
+#Gets and displays the final results
 def get_results(widget):
     cpm = get_chars_per_minute()
+    #Words per minute using the international standard average word length
     wpm = cpm // 5
     widget.config(state='normal')
-    widget.replace('1.0', 'end', f'{cpm} CPM - {wpm} WPM')
+    widget.replace('1.0', 'end',
+                   f'CPM:  {cpm}\n'
+                   f'WPM:  {wpm}')
     widget.config(state='disabled')
-    print(cpm, wpm)

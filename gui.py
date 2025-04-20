@@ -15,9 +15,6 @@ SOFT_WHITE = "#F3F3F3"
 SOFT_GREEN = "#52DF81"
 SOFT_PURPLE = "#C854FE"
 
-#TODO PLEASE THINK ABOUT THE REFRESH BUTTON (ALWAYS ON OR NOT)
-#TODO YOU NEED TO ADD THE LOGIC AND FUNCTION FOR SAVING AND COMPARING ON THE LEADERBOARD
-
 def text_to_type_show():
     #Refreshes the text to type area with a new text
     text_to_type.config(state='normal')
@@ -28,7 +25,7 @@ def text_to_type_show():
     try:
         timer_entry.config(state="normal")
         timer_entry.delete(0, "end")
-        timer_entry.insert(0, "10")
+        timer_entry.insert(0, "60")
         timer_entry.config(state="disabled")
     except Exception as e:
         # timer_entry is not defined
@@ -66,9 +63,9 @@ def timer_end():
     global old_time
     if old_time is not None and int(timer_entry.get()) <= 0:
         old_time = None
-        text_to_type.focus_set()
-        enable_button()
         user_entry.config(state='disabled')
+        window.focus_set()
+        enable_button()
         get_results(results)
 
 def timer_update():
@@ -236,7 +233,7 @@ canvas.create_text(
     626.0,
     444.0,
     anchor="nw",
-    text="Best Results:",
+    text="Your Score:",
     fill=SOFT_WHITE,
     font=("Arial BoldMT", 16 * -1)
 )
@@ -249,7 +246,7 @@ results_bg = canvas.create_image(
     image=results_im
 )
 results = Text(
-    font=("ArialMT", 16 * -1),
+    font=("Arial BoldMT", 16 * -1),
     bd=0,
     bg=SOFT_RED,
     fg=SOFT_WHITE,
@@ -261,10 +258,9 @@ results.place(
     width=146.0,
     height=74.0
 )
-results.insert("end", "#01 - 222 CPM\n"
-                      "#02 - 189 CPM\n"
-                      "#03 - 99 CPM\n"
-                      "#99 - 12 CPM")
+results.insert("end",
+               "CPM: 0\n"
+               "WPM: 0")
 results.config(state='disabled',)
 
 window.resizable(False, False)
